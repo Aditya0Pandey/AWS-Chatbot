@@ -1,0 +1,44 @@
+import json
+
+def lambda_handler(event, context):
+    # Extract intent and slot values from the event
+    intent_name = event['sessionState']['intent']['name']
+    slots = event['sessionState']['intent']['slots']
+    
+    if intent_name == 'HotelBooking':
+        check_in_date = slots['CheckInDate']['value']['interpretedValue']
+        check_out_date = slots['CheckOutDate']['value']['interpretedValue']
+        room_type = slots['RoomType']['value']['interpretedValue']
+        
+        # Add logic to interact with booking API
+        booking_response = book_hotel(check_in_date, check_out_date, room_type)
+        
+        # Create a response for Lex
+        if booking_response['status'] == 'success':
+            message = f"Your hotel is booked from {check_in_date} to {check_out_date} in a {room_type} room. Thank you!"
+        else:
+            message = "Sorry, there was an issue booking your hotel. Please try again."
+        
+        response = {
+            "sessionState": {
+                "dialogAction": {
+                    "type": "Close"
+                },
+                "intent": {
+                    "name": intent_name,
+                    "state": "Fulfilled"
+                }
+            },
+            "messages": [
+                {
+                    "contentType": "PlainText",
+                    "content": message
+                }
+            ]
+        }
+        
+        return response
+
+def book_hotel(check_in_date, check_out_date, room_type):
+    # Dummy function to simulate booking logic
+    return {"status": "success"}
